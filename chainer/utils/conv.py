@@ -29,10 +29,9 @@ def _cut_and_pad(img, y1, y2, x1, x2, pval=0):
     x1 += pw1
     x2 += pw1
 
-    if ph1 > 0 or ph2 > 0 or pw1 > 0 or pw2 > 0:
-        img = numpy.pad(img,
-                        ((0, 0), (0, 0), (ph1, ph2), (pw1, pw2)),
-                        mode='constant', constant_values=(pval,))
+    img = numpy.pad(img,
+                    ((0, 0), (0, 0), (ph1, ph2), (pw1, pw2)),
+                    mode='constant', constant_values=(pval,))
     return img[:, :, y1:y2, x1:x2]
 
 
@@ -42,6 +41,12 @@ def im2col_cpu(img, kh, kw, sy, sx, ph, pw, pval=0, cover_all=False):
     out_w = get_conv_outsize(w, kw, sx, pw, cover_all)
 
     img = _cut_and_pad(img, -ph, h + ph + sy - 1, -pw, w + pw + sx - 1, pval)
+
+    if ph < 0:
+        img[:, :, h + ph * 2:, :] = pval
+    if pw < 0:
+        img[:, :, :, w + pw * 2:] = pval
+
     col = numpy.ndarray((n, c, kh, kw, out_h, out_w), dtype=img.dtype)
 
     for i in six.moves.range(kh):
@@ -72,7 +77,8 @@ def im2col_gpu(img, kh, kw, sy, sx, ph, pw, cover_all=False):
 
            int in_y = ky + out_y * sy - ph;
            int in_x = kx + out_x * sx - pw;
-           if (in_y >= 0 && in_y < h && in_x >= 0 && in_x < w) {
+           if (in_y >= 0 && in_y < h + min(0, ph) &&
+               in_x >= 0 && in_x < w + min(0, pw)) {
              col[i] = img[in_x + w * (in_y + h * c0)];
            } else {
              col[i] = 0;
