@@ -269,4 +269,13 @@ class TestAveragePooling2D(unittest.TestCase):
         self.check_backward(cuda.to_gpu(self.x), cuda.to_gpu(self.gy), False)
 
 
+class TestAveragePooling2DCoverAll(unittest.TestCase):
+    cover_all = True
+
+    def setUp(self):
+        super(TestAveragePooling2DCoverAll, self).setUp()
+        self.gy = numpy.random.uniform(-1, 1,
+                                       (2, 3, 3, 2)).astype(numpy.float32)
+
+
 testing.run_module(__name__, __file__)
