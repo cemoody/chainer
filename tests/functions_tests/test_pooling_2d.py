@@ -146,8 +146,6 @@ class TestMaxPooling2DNegativePadding(unittest.TestCase):
                     expect = numpy.array([
                         [self.x[k, c, 1:3, 1:3].max()],
                     ])
-                print self.x[k, c]
-                print y_data[k, c]
                 gradient_check.assert_allclose(expect, y_data[k, c])
 
     @condition.retry(3)
